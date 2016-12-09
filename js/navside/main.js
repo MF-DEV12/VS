@@ -1,52 +1,5 @@
 jQuery(document).ready(function($){
-	//move nav element position according to window width
-	// moveNavigation();
-	// $(window).on('resize', function(){
-	// 	(!window.requestAnimationFrame) ? setTimeout(moveNavigation, 300) : window.requestAnimationFrame(moveNavigation);
-	// });
-
-	// //mobile version - open/close navigation
-	// $('.cd-nav-trigger').on('click', function(event){
-	// 	event.preventDefault();
-	// 	if($('header').hasClass('nav-is-visible')) $('.moves-out').removeClass('moves-out');
-		
-	// 	$('header').toggleClass('nav-is-visible');
-	// 	$('.cd-main-nav').toggleClass('nav-is-visible');
-	// 	$('.cd-main-content').toggleClass('nav-is-visible');
-	// });
-
-	// //mobile version - go back to main navigation
-	// $('.go-back').on('click', function(event){
-	// 	event.preventDefault();
-	// 	$('.cd-main-nav').removeClass('moves-out');
-	// });
-
-	// //open sub-navigation
-	// $('.cd-subnav-trigger').on('click', function(event){
-	// 	event.preventDefault();
-	// 	$('.cd-main-nav').toggleClass('moves-out');
-	// });
-
-	// $('.cd-main-nav a').click(function(e){
-	// 	var elem = $(this)
-	// 	$('.cd-main-nav li').removeClass("active")
-	// 	elem.closest("li").addClass("active")
-	// 	if(elem.attr("href").indexOf("#") >= 0){
-
-	// 		var a = elem.attr("href").replace("#","")
-	// 		// SUB MENU
-	// 		$("nav.sub-menu").find("ul.selected-sub-menu").removeClass("selected-sub-menu")
-	// 		$("nav.sub-menu").find("ul."+a).addClass("selected-sub-menu")
-
-	// 		// CONTENT GROUP
-	// 		$("div.content-holder .content-group.show").removeClass("show");
-	// 		$("div.content-holder .content-group[data-group='"+ a +"']").addClass("show");
-	// 		$("nav.sub-menu").find("ul."+a).find("li.current a").click()
-			 
-
-	// 		$(".cd-nav-trigger").click();
-	// 	}
-	// })
+ 
 
 	$("div.sidebar ul.nav a").click(function(e){
 		var elem = $(this)
@@ -135,6 +88,8 @@ jQuery(document).ready(function($){
 			$("table[data-table='listitemvariant']").closest("div.dataTables_wrapper").find("div.dataTables_filter").hide() 
 		}
 		if(elem.closest("li").data("view") == "item-review"){
+		
+
 			$("#btn-submititemvariant").removeClass("disabled")
 
 			var listposupplier = new Object()	
@@ -144,7 +99,7 @@ jQuery(document).ready(function($){
             arrList.fields = "Image|Thumbnail,VariantsName|Item Variant,DPOCost|DPO Cost,SRP|Suggessted Retail Price (SRP)"
             listposupplier["listitemvariantreview"] = arrList; 
             $("input#lbl-itemname").val($("#txt-itemname").val())
-            $("input#lbl-uom").val($("#txt-UOM").val())
+            $("input#lbl-uom").val($("select#list-uom option:selected").val())
             var category = ""
             category += $("#list-family option:selected").text() + " > "
             category += $("#list-category option:selected").text() + " > "
@@ -162,27 +117,21 @@ jQuery(document).ready(function($){
 	})
 
 
-
-	// function moveNavigation(){
-	// 	var navigation = $('.cd-main-nav-wrapper');
- //  		var screenSize = checkWindowWidth();
- //        if ( screenSize ) {
- //        	//desktop screen - insert navigation inside header element
-	// 		navigation.detach();
-	// 		navigation.insertBefore('.cd-nav-trigger');
-	// 	} else {
-	// 		//mobile screen - insert navigation after .cd-main-content element
-	// 		navigation.detach();
-	// 		navigation.insertAfter('.cd-main-content');
-	// 	}
-	// }
-
-	// function checkWindowWidth() {
-	// 	var mq = window.getComputedStyle(document.querySelector('header'), '::before').getPropertyValue('content').replace(/"/g, '').replace(/'/g, "");
-	// 	return ( mq == 'mobile' ) ? false : true;
-	// }
-
+ 
 	 
+	$("dl.notify-list").on("click","dd a.notify", function(e){
+		var elem = $(this)
+		$("div.sidebar ul.nav li[data-content="+elem.data("content")+"] a").click();
+		// if(elem.data("content") == "receivings"){
+		// 	setTimeout(function(e){
+		// 		toggleMainDisplay(false,$("button#btn-directreceive"),"Select PO List to Receive")
+
+		// 	}, 1000)
+			
+		// 	//$("button#btn-directreceive").click();
+		// }
+
+	})
 
 
 });
@@ -259,12 +208,18 @@ function validateAttribute(dataview){
 				var elem = $(this)
 		   		if(elem.text().indexOf("Add") > 0)
 		   			isOkay= false;
-			})
-
-			
-
-			if(!isOkay)
+			}) 
+			if(!isOkay){
 		   		$("div.step-holder > div.step-view[data-view=item-variants]").find("#btn-itemvariantadd").after("<p class=\"label-error\">Please complete the variant details below.</p>")
+				return	 isOkay	;
+			}
+
+
+ 			if($("table[data-table=listitemvariant] td span.label-error").length > 0){
+                
+		   		//$("div.step-holder > div.step-view[data-view=item-variants]").find("#btn-itemvariantadd").after("<p class=\"label-error\">Invalid DPO Cost and SRP on the variants.</p>")
+                isOkay = false;
+            }	
 		}
 		
 	}

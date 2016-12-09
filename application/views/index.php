@@ -30,25 +30,33 @@
                 <span class="content-header"><span>Dashboard</span><subheader></subheader></span>
                  <ul class="nav navbar-nav navbar-right">
                     <li><a></a></li>
-                   <!--  <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color:gray;"><span class="glyphicon glyphicon-bell"></span><span class="badge">10</span> </a>
+                    <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color:gray;"><span class="glyphicon glyphicon-bell"></span><span class="badge notification-count"><?=((count($notification) > 0) ? count($notification) : "");?></span> </a>
                         <ul class="dropdown-menu" style="width:325px;height:300px;"
                             <li>
                                 <div class="navbar-content">
-                                    <h5>Notifications:</h5>
+                                    <h5><span class="glyphicon glyphicon-bell"></span> Notifications:</h5>
                                     <div class="row"> 
                                         <div class="col-md-12" align="center">
-                                             <dl>
-                                                 <dd><a class="notify" data-content="receivings">Purchase Order <span class="badge">10</span></a></dd>
-                                                 <dd><a class="notify" data-content="allorders">Customer Order <span class="badge">10</span></a></dd>
-                                                 <dd>Order</dd> 
-                                             </dl>
-                                        </div>
-                                         
+                                         <dl class="notify-list">
+                                             <?php if($notification) { ?>
+                                              
+                                               
+                                                <?php foreach ($notification as $key) { ?> 
+                                                   <dd> <a class="notify" data-content="<?=$key->link;?>"> <b><?=$key->total;?></b> <?=$key->notify;?></a></dd> 
+                                                <?php } ?>
+                                              
+                                            
+                                             <?php }else {  ?>
+                                                <p class="empty">No notifications</p>
+
+                                             <?php } ?>
+                                         </dl>
+                                        </div> 
                                     </div>
                                 </div> 
                             </li>
                         </ul>
-                    </li> -->
+                    </li>
                     <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color:gray;"><span class="glyphicon glyphicon-user"></span></span>
                         <b class="caret"></b></a>
                         <ul class="dropdown-menu" style="width:245px;">
@@ -60,7 +68,7 @@
                                         </div>
                                         <div class="col-md-9">
                                             <span><?=$username;?></span>
-                                            <p class="text-muted small"><?=$role;?></p>
+                                            <p class="text-muted small role"><?=$role;?></p>
                                             <div class="divider">
                                             </div>
                                             <!-- <a href="#" class="btn btn-primary btn-sm active">View Profile</a> -->
@@ -107,11 +115,24 @@
                  <div class="col-md-8">
                     <label for="lbl-variant">Variant name:</label>
                     <p id="lbl-variant" style="padding-bottom:25px;"></p>
+                    <p id="lbl-srp" style="padding-bottom:25px;">SRP: <span></span></p>
                     <div class="group">
                      <input class="inputMaterial numeric" type="text" id="txt-editPriceAdmin">
                       <span class="highlight"></span>
                       <span class="bar"></span>
                       <label class="formlabel">Unit Price:</label>
+                    </div> 
+                    <div class="group">
+                     <input class="inputMaterial quantity" type="text" id="txt-editLowstockAdmin" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                      <span class="highlight"></span>
+                      <span class="bar"></span>
+                      <label class="formlabel">Low stock level:</label>
+                    </div> 
+                    <div class="group">
+                     <input class="inputMaterial quantity" type="text" id="txt-editCriticalAdmin" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                      <span class="highlight"></span>
+                      <span class="bar"></span>
+                      <label class="formlabel">Critical level:</label>
                     </div> 
      
                     <p class="label-error"></p>

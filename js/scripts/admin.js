@@ -225,16 +225,23 @@ $(function(){
         $("#btn-receivesubmit").click(function(e){
              var isOkay = true
              var isValid = true
-            //VALIDATE THE RECEIVED INPUT
+            //VALIDATE THE RECEIVED INPUT\
+            $("input.poreceived").closest("tr").find("p.label-error").remove();
             $("input.poreceived").each(function(e){
                 var elem = $(this)
                 if($.trim(elem.val()).length == 0 || parseInt(elem.val()) == 0 ){
-                    isOkay = false;
+                    elem.after("<p class=\"label-error\">Please input for the Received.</p>")
+                    isOkay = false; 
                     return;
-                } 
+                }  
+                var tr = elem.closest("tr")
+                var porequest = parseInt(tr.find("td:last-child").text(),10)
 
-
-
+                if(porequest < parseInt(elem.val(),10)){
+                    elem.after("<p class=\"label-error\">Received must not be greater than the Requested.</p>")
+                    isOkay = false; 
+                    return;
+                }
 
             })
 
@@ -250,16 +257,15 @@ $(function(){
                         bindingDatatoDataTable(response);
                         tableSubmit.clear().draw();
                          $("#btn-receivecancel").click();
-                        bootbox.alert("Transaction completed.",function(){})
+                        bootbox.alert("Transaction completed.",function(){
+                             updateNotification("receivings")
+                        })
                     }
 
                 }, ajaxError)
                     
             }
-            else{
-                bootbox.alert("Please input the Received first.", function(){})
-
-            }
+            
         })
 
     //Suppliers
@@ -917,10 +923,16 @@ $(function(){
                 return;
             }
 
+            if($("table[data-table=listitemvariant] td span.label-error").length > 0){
+                //bootbox.alert("Invalid DPO Cost and SRP on the variants."); 
+                return;
+            }
+
+
             var data = new Object();
             data.Image = ""
             data.Attributes = "<a class=\"attribute-setup-show\" data-toggle=\"modal\" data-backdrop=\"static\"  data-keyboard=\"false\" data-target=\"#attributesetup\"><span class=\"glyphicon glyphicon-cog\"></span> Add variants</a>";
-            data.DPOCost = "<input type=\"text\" class=\"numeric variant-price form-control\"/>";
+            data.DPOCost = "<input type=\"text\" class=\"numeric variant-dpocost form-control\"/>";
             data.SRP = "<input type=\"text\" class=\"numeric variant-srp form-control\"/>";
             data.Action = "<a onclick=\"deleteVariant(this);\"><span class=\"glyphicon glyphicon-remove\"></span></a>";
              
@@ -1014,6 +1026,8 @@ $(function(){
             curtrvariant.closest("tr").find("td:nth-child(1)").html(img)
             curtrvariant.closest("tr").find("td:nth-child(2)").html(stringAttribute)
             curtrvariant.closest("tr").attr("data-variant", JSON.stringify(stringJson))
+
+            $("div#attributesetup").find("input[type=file]").val("")
     
             $("div#attributesetup").modal("hide");
         })
@@ -1045,8 +1059,8 @@ $(function(){
             if(!isOkaytoUpdateVariants()){return;}
             var variant = new Object()
             var param = new Object()
-            variant.DPOCost = $("input#txt-editPrice").val().replace(",","")
-            variant.SRP = $("input#txt-editSRP").val().replace(",","")
+            variant.DPOCost = toMoneyValue($("input#txt-editDpocost").val())
+            variant.SRP = toMoneyValue($("input#txt-editSRP").val())
 
             param.vno = curVariantNoEdit;
             param.data = JSON.stringify(variant);
@@ -1055,7 +1069,7 @@ $(function(){
                 function(response){
                     if(response){
                         var modal =  $("#editvariant")
-                        curTRVariantNoEdit.childNodes[3].innerHTML = modal.find("input#txt-editPrice").val()
+                        curTRVariantNoEdit.childNodes[3].innerHTML = modal.find("input#txt-editDpocost").val()
                         curTRVariantNoEdit.childNodes[4].innerHTML = modal.find("input#txt-editSRP").val()
                        
                         $("#editvariant").modal("hide")
@@ -1068,7 +1082,10 @@ $(function(){
             if(!isOkaytoUpdateVariantsAdmin()){return;}
             var variant = new Object()
             var param = new Object()
-            variant.Price = $("input#txt-editPriceAdmin").val().replace(",","")
+            variant.Price = toMoneyValue($("input#txt-editPriceAdmin").val())
+            variant.LowStock = toMoneyValue($("input#txt-editLowstockAdmin").val())
+            variant.Critical = toMoneyValue($("input#txt-editCriticalAdmin").val())
+            variant.Owned = 1
 
             param.vno = curVariantNoEditAdmin;
             param.data = JSON.stringify(variant);
@@ -1077,7 +1094,9 @@ $(function(){
                 function(response){
                     if(response){
                         var modal =  $("#editvariantadmin")
-                        curTRVariantNoEditAdmin.childNodes[3].innerHTML = modal.find("input#txt-editPriceAdmin").val()
+                        curTRVariantNoEditAdmin.childNodes[5].innerHTML = modal.find("input#txt-editPriceAdmin").val()
+                        curTRVariantNoEditAdmin.childNodes[6].innerHTML = modal.find("input#txt-editLowstockAdmin").val()
+                        curTRVariantNoEditAdmin.childNodes[7].innerHTML = modal.find("input#txt-editCriticalAdmin").val()
                        
                         $("#editvariantadmin").modal("hide")
                     }
@@ -1106,6 +1125,24 @@ $(function(){
                 elem.closest("table.form-table").find("p.label-error").remove()
             
            
+        })
+
+
+        $("table[data-table=listitemvariant]").on("blur", "td input.variant-srp, td input.variant-dpocost",function(e){
+            $("table[data-table=listitemvariant]").find("span.label-error").remove()
+            var elem = $(this)
+            var tr = elem.closest("tr")
+            var dpo = tr.find("input.variant-dpocost")
+            var srp = tr.find("input.variant-srp")
+             if($.trim(dpo.val()).length > 0 && $.trim(srp.val()).length > 0){
+                var dpoValue = toMoneyValue(dpo.val())
+                var srpValue = toMoneyValue(srp.val()) 
+                if(parseFloat(dpoValue,10) >= parseFloat(srpValue,10)){
+                   srp.after("<span class=\"label-error\">DPO Cost must be lower than to SRP.</span>") 
+                    
+                }  
+            } 
+            
         })
 
 
@@ -1147,8 +1184,8 @@ $(function(){
         var param = new Object();
         param.rlno = requestlistno;
         param.qty = elem.value;
-        param.total = parseFloat(elem.value,2) * parseFloat(data.DPOCost.replace(",",""), 2)
-        callAjaxJson("main/updatePOQty", param, 
+        param.total = parseFloat(elem.value,2) * parseFloat(toMoneyValue(data.DPOCost), 2)
+        callAjaxJson("main/updatePOQty", param,  
             function(response){
                 if(response){
                    data.Total = toMoney(param.total); 
@@ -1163,6 +1200,8 @@ $(function(){
 
     // Receivings
      function updatePOReceived(requestlistno,elem){
+
+        if(!validateReceived(elem)){return;}
         var param = new Object();
         param.rlno = requestlistno;
         param.rec = elem.value;
@@ -1174,6 +1213,30 @@ $(function(){
 
             }
         , ajaxError) 
+    }
+
+    function validateReceived(elem){
+        var tr = elem.closest("tr")
+       
+        elem = $(elem)
+        tr = $(tr)
+        tr.find("p.label-error").remove()
+        var porequest =  parseInt(tr.find("td:last-child").text(),10)
+        var poreceived =  parseInt(elem.val(),10)
+
+
+        if(porequest < poreceived){
+                     
+            elem.after("<p class=\"label-error\">Received must not be greater than the Requested.</p>")
+            return false
+        }
+        return true;
+
+       
+    }
+
+    function insertAfter(referenceNode, newNode) {
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
 
     //Suppliers
@@ -1245,9 +1308,9 @@ $(function(){
         }, ajaxError)
      }
 // INVENTORY 
-    function physicalCount(variantno){
+    function physicalCount(variantno, ItemDescription){
         var promptOptions = {
-          title: "Please enter the stock count for " + variantno + ":",
+          title: "Please enter the stock count for this item: <br/> <br/>" + ItemDescription ,
           inputType: 'number',
           buttons: { 
             confirm: {
@@ -1265,6 +1328,7 @@ $(function(){
 
                          bindingDatatoDataTable(response);
                          bootbox.alert("Update Successfully");
+                         updateNotification("lowstocks");
 
                     }, 
                 ajaxError)                              
@@ -1282,16 +1346,43 @@ $(function(){
         dl.empty();
         for(x in data){
             var dd = $("<dd/>");
-            dd.append("<span class=\"data-edit\" >"+ data[x].Name +"</span>")
-            // dd.append("<span class=\"glyphicon glyphicon-menu-right pull-right selector\"></span>")
-            dd.append("<span class=\"action pull-right\"><a class=\"edit\">Edit</a> | <a class=\"delete\">Delete</a></span>")
-            dd.data("id",data[x].id) 
-            dl.append(dd);
+
+            if(!dl.is(".list-family")){
+                dd.append("<span class=\"data-edit\" >"+ data[x].Name +"</span>")
+                // dd.append("<span class=\"glyphicon glyphicon-menu-right pull-right selector\"></span>")
+                dd.append("<span class=\"action pull-right\"><a class=\"edit\">Edit</a> | <a class=\"delete\">Delete</a></span>")
+                dd.data("id",data[x].id) 
+                dl.append(dd);
+            }
+            else{
+                var divrow = $("<div/>");
+                var div7 = $("<div/>");
+                var div5 = $("<div/>");
+
+                divrow.addClass("row")
+                div5.addClass("col-sm-5")
+                div5.attr("align","center")
+                div7.addClass("col-sm-7")
+
+
+                div5.append("<div class=\"image-holder\"><img src=\"" + baseUrl + "images/"+ ((data[x].ImageFile != null) ? "variant-folder/" + data[x].ImageFile : "noimage.gif" ) +"\" onerror=\"this.src='"+ baseUrl  +"/images/noimage.gif';\"/></div>")
+                div5.append("<button class=\"btn btn-action upload\">Upload image</button> <input type=\"file\" data-col=\"Level1No\" data-id=\""+ data[x].id +"\" data-table=\"Level1\" class=\"file-upload\" style=\"display: none;\">")
+
+
+                div7.append("<span class=\"data-edit\" >"+ data[x].Name +"</span>")
+                div7.append("<span class=\"action pull-right\"><a class=\"edit\">Edit</a> | <a class=\"delete\">Delete</a></span>")
+                dd.data("id",data[x].id) 
+                divrow.append(div5)
+                divrow.append(div7)
+                dd.append(divrow)
+                 dl.append(dd);
+            }
+           
         }
         if(!data.length){
             dl.append("<p class=\"empty\">No record(s) found</p>");
 
-        }
+        } 
     }
 
     function removeOrRecoverItem(itemno, itemname,elem, status){
@@ -1375,8 +1466,10 @@ $(function(){
             row.Image = "<img src=\""+ baseUrl +"images/variant-folder/" + row.FileName + "\" width=\"100px\"/>"
             row.VariantsName = jsontoString(tr.data("variant"))     
             row.VariantsNameJSON = tr.data("variant") 
-            row.DPOCost =  tr.find("input.variant-price").val().replace(",","")        
-            row.SRP = tr.find("input.variant-srp").val().replace(",","")       
+            row.DPOCost =  toMoneyValue(tr.find("input.variant-dpocost").val())        
+            row.DPOCostStr =  tr.find("input.variant-dpocost").val()      
+            row.SRP = toMoneyValue(tr.find("input.variant-srp").val())       
+            row.SRPStr = tr.find("input.variant-srp").val()      
             data.push(row) 
 
         })
@@ -1384,7 +1477,7 @@ $(function(){
         var list = new Object();
         newItemVariantList = data    
         arrList.list  = data;
-        arrList.fields = "Image|Thumbnail,VariantsName|Item Variant,DPOCost|DPO Cost,SRP|Suggessted Retail Price (SRP)"
+        arrList.fields = "Image|Thumbnail,VariantsName|Item Variant,DPOCostStr|DPO Cost,SRPStr|Suggessted Retail Price (SRP)"
         list["listitemvariantreview"] = arrList;
         bindingDatatoDataTable(list)
         $("table[data-table='listitemvariantreview']").closest("div.dataTables_wrapper").find("div.dataTables_filter").hide() 
@@ -1435,7 +1528,7 @@ $(function(){
   
         modal.find("div.image-variant").html(tr.childNodes[1].innerHTML)
         modal.find("p#lbl-variant").html(tr.childNodes[2].innerHTML)
-        modal.find("input#txt-editPrice").val(tr.childNodes[3].innerHTML)
+        modal.find("input#txt-editDpocost").val(tr.childNodes[3].innerHTML)
         modal.find("input#txt-editSRP").val(tr.childNodes[4].innerHTML)
     }
 
@@ -1450,9 +1543,12 @@ $(function(){
         curVariantNoEditAdmin = tr.childNodes[0].innerHTML
         curTRVariantNoEditAdmin = tr
   
-        modal.find("p#lbl-variant").html(tr.childNodes[1].innerHTML)
-        modal.find("div.image-variant").html(tr.childNodes[2].innerHTML)
-        modal.find("input#txt-editPriceAdmin").val(tr.childNodes[3].innerHTML) 
+        modal.find("div.image-variant").html(tr.childNodes[1].innerHTML)
+        modal.find("p#lbl-variant").html(tr.childNodes[2].innerHTML)
+        modal.find("p#lbl-srp span").html(tr.childNodes[4].innerHTML)
+        modal.find("input#txt-editPriceAdmin").val(tr.childNodes[5].innerHTML) 
+        modal.find("input#txt-editLowstockAdmin").val(tr.childNodes[6].innerHTML) 
+        modal.find("input#txt-editCriticalAdmin").val(tr.childNodes[7].innerHTML) 
     }
 
     function deleteVariant(elem){
@@ -1471,15 +1567,25 @@ $(function(){
     function isOkaytoUpdateVariants(){
         $("div#editvariant").find("p.label-error").text("")
         var isOkay = true;
-        if($.trim($("input#txt-editPrice")).length == 0 || $("input#txt-editPrice").val() == "0"){
+        if($.trim($("input#txt-editDpocost")).length == 0 || $("input#txt-editDpocost").val() == "0"){
             isOkay = false
         }
         if($.trim($("input#txt-editSRP")).length == 0 || $("input#txt-editSRP").val() == "0"){
             isOkay = false
         }
 
-        if(!isOkay)
+        if(!isOkay){ 
             $("div#editvariant").find("p.label-error").text("Please input all fields.")
+            return isOkay   
+        }
+
+        if(parseFloat(toMoneyValue($("input#txt-editDpocost").val()),10) >= parseFloat(toMoneyValue($("input#txt-editSRP").val()),10)){
+            $("div#editvariant").find("p.label-error").text("Suggested Retail Price(SRP) must be greater than DPO Cost.")
+            isOkay = false
+        }
+
+
+
         return isOkay;
     }
     function isOkaytoUpdateVariantsAdmin(){
@@ -1488,9 +1594,32 @@ $(function(){
         if($.trim($("input#txt-editPriceAdmin")).length == 0 || $("input#txt-editPriceAdmin").val() == "0"){
             isOkay = false
         }
+        if($.trim($("input#txt-editLowstockAdmin")).length == 0 || $("input#txt-editLowstockAdmin").val() == "0"){
+            isOkay = false
+        }
+        if($.trim($("input#txt-editCriticalAdmin")).length == 0 || $("input#txt-editCriticalAdmin").val() == "0"){
+            isOkay = false
+        }
+        if(!isOkay){
+            $("div#editvariantadmin").find("p.label-error").text("Please input all required field(s).")
+            return isOkay;
+        }
 
-        if(!isOkay)
-            $("div#editvariantadmin").find("p.label-error").text("Please input the Unit price.")
+        var currentSRPStr = $("p#lbl-srp span").text();
+        var currentSRP = toMoneyValue(currentSRPStr);
+        var inputPrice = toMoneyValue($("input#txt-editPriceAdmin").val());
+
+        if(parseFloat(currentSRP,10) > parseInt(inputPrice,10)){
+            $("div#editvariantadmin").find("p.label-error").text("The Unit price must be greater than the SRP -> " + currentSRPStr + " "); 
+            isOkay = false
+            return isOkay;
+        }
+
+        if(parseInt($("input#txt-editCriticalAdmin").val(),10) > parseInt($("input#txt-editLowstockAdmin").val(),10)){
+            $("div#editvariantadmin").find("p.label-error").text("Low Stock Level must be greater than the Critical.");
+            isOkay = false
+        }
+ 
         return isOkay;
     }
 
@@ -1696,15 +1825,22 @@ function bindingDataViewingVariants(response,table){
             addHeader(tr,"No") 
             addHeader(tr,"Image")
             addHeader(tr,"Variant")
-            addHeader(tr,((data.role=="admin") ?  "Price" : "DPO Cost"))
 
-            if(data.role=="admin")
+            if(data.role=="admin"){ 
                 addHeader(tr,"DPO Cost")
-
-            if(data.role=="supplier")
-                addHeader(tr,"Suggested Retail Price (SRP)")
+                addHeader(tr,"SRP") 
+                addHeader(tr,"Price")
+                addHeader(tr,"Low Stock Level")
+                addHeader(tr,"Critical Level")
+            }
+            else{
+                addHeader(tr,"DPO Cost") 
+                addHeader(tr,"SRP")  
+            }
+ 
+            
             // if(data.isAction) 
-                addHeader(tr,"Action")
+            addHeader(tr,"Action")
             thead.append(tr)
      
             for(row in list){
@@ -1712,16 +1848,21 @@ function bindingDataViewingVariants(response,table){
                 addCellData(tr,list[row].VariantNo)
                 addCellData(tr,"<img src=\""+ baseUrl +  "images/variant-folder/" + list[row].ImageFile +"\" alt=\"\" width=\"100px\" onerror=\"this.src='"+ baseUrl + "images/noimage.gif';\"/>") 
                 addCellData(tr,list[row].VariantName) 
-                addCellData(tr,((data.role=="admin") ?  toMoney(list[row].Price) : toMoney(list[row].DPOCost)))
 
-                if(data.role=="admin")
-                    addCellData(tr,toMoney(list[row].DPOCost))
+                if(data.role=="admin"){ 
+                    addCellData(tr,toMoney(list[row].DPOCost)) 
+                    addCellData(tr,toMoney(list[row].SRP)) 
+                    addCellData(tr,toMoney(list[row].Price))  
+                    addCellData(tr,list[row].LowStock)  
+                    addCellData(tr,list[row].Critical)  
+                }
+                else{
+                    addCellData(tr,toMoney(list[row].DPOCost)) 
+                    addCellData(tr,toMoney(list[row].SRP)) 
+                }
 
-                if(data.role=="supplier")
-                    addCellData(tr,toMoney(list[row].SRP))
-
-                // if(data.isAction) 
-                     addCellData(tr,list[row].Action)
+  
+                addCellData(tr,list[row].Action)
                 tbody.append(tr)
             }  
             table.append(thead)
@@ -1807,7 +1948,50 @@ function setupDataTable(table, data, fields){
      
     listObjTableBinded[table.data("table")] = dttable
     dttable.draw(); 
+    updateNotification(table.data("table"))
+
 }
+
+
+ function updateNotification(table){
+    var includeTable = ["requestlist", "receivings", "lowstocks", "backorders"]
+
+    if(includeTable.indexOf(table) < 0) {return;}
+
+    if($("p.role").text() == "admin"){
+        reBindNotication("getNotificationAdminUpdate")
+    }
+    else if($("p.role").text() == "supplier"){
+        reBindNotication("getNotificationSupplierUpdate")
+    }
+
+
+ }
+ function reBindNotication(ctrl){
+    
+    callAjaxJson("main/" + ctrl,new Object(),
+        function(response){
+            $("dl.notify-list").children().remove();
+            var data = response
+            for(x in data){
+                var dd = $("<dd/>")
+                var a = $("<a/>")
+                a
+                    .addClass("notify")
+                    .data("content", data[x].link)
+                    .append("<b>"+ data[x].total +"</b> " + data[x].notify)
+                dd.append(a)
+                $("dl.notify-list").append(dd)
+
+            } 
+            if(data.length == 0){
+                $("dl.notify-list").append("<p class=\"empty\">No notifications.</p>")
+            }
+
+            $("span.notification-count").text(((data.length > 0) ? data.length : ""))
+            
+        })
+ }
 
 
 

@@ -21,9 +21,9 @@
               <li data-menu="inventory">
                 <a data-toggle="collapse" data-target="#inventory" data-parent="#nav">Inventory</a>
                 <ul id="inventory" class="collapse sub-menu">
+                    <li data-content="items" data-header="Items"><a href="#">Item Master</a></li>
                     <li data-content="inventory" data-header="Inventory"><a href="#">Inventory</a></li>
-                    <li data-content="items" data-header="Items"><a href="#">Items</a></li>
-                    <li data-content="lowstocks" data-header="Low Stocks"><a href="#">Low Stocks</a></li>
+                    <li data-content="lowstocks" data-header="Low and Critical Stocks"><a href="#">Low / Critical Stocks</a></li>
                     <li data-content="categories" data-header="Categories"><a href="#">Categories</a></li>
                     <li data-content="removeditems" data-header="Removed Items"><a href="#">Removed Items</a></li>
                 </ul>
@@ -31,6 +31,14 @@
               <li data-content="allorders" data-header="Customer's Order">
                 <a>Customer's Order</a>
               </li>
+             <!--   <li data-menu="reports">
+                <a data-toggle="collapse" data-target="#reports" data-parent="#nav">Reports</a>
+                <ul id="reports" class="collapse sub-menu">
+                    <li data-content="items" data-header="Items"><a href="#">List of Customers</a></li>
+                    <li data-content="items" data-header="Items"><a href="#">List of Items</a></li>
+                     
+                </ul>
+              </li> -->
               <!-- <li data-content="forums">
                 <a>Forums</a>
               </li>  
@@ -43,9 +51,8 @@
             <a data-toggle="collapse" data-target="#sup-orders" data-parent="#nav">Request List</a>
             <ul id="sup-orders" class="collapse sub-menu">
                 <li data-content="requestlist" data-header="Request List"><a href="#">Request List</a></li>
-                <li data-content="allorders" data-header="Customer's Order">
-                  <a>Customer's Order</a>
-                </li>
+                <!-- <li data-content="allorders" data-header="Customer's Order">  <a>Customer's Order</a>  </li> -->
+                <li data-content="backorders" data-header="Back Orders"><a href="#">Back Orders</a></li>
                 <!-- <li data-content="sup-neworders" data-header="New Order"><a href="#">New 
                 <?php if($requeststatus->New > 0){?>
                 <span class="badge"><?=$requeststatus->New;?></span>

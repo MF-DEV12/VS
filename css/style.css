@@ -161,7 +161,7 @@ div.group-2{
     margin-top: -22px;
 }
 
-.poquantity, .poreceived{
+.poquantity, .poreceived, .quantity{
   text-align: right !important;
 }
 
@@ -175,6 +175,17 @@ min-height: 20px; /* or whatever height you need to make them all consistent */
   text-align: right;
   margin: 0px;
 }
+
+span.badge {
+    position: absolute;
+    left: 24px;
+    top: 12px;
+    background: #f44336;
+}
+.notify-list a.notify{
+  cursor: pointer;
+}
+
 #label-suppliername{
   border-bottom: 1px solid #ddd;
 }
@@ -253,7 +264,9 @@ div.btn-child-button, div.main-button{
 
 }
 
-.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody th, .dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody td {
+table[data-table=categories] td:first-child,
+table[data-table=listitemvariant] td 
+{
     vertical-align: top !important;
 }
 
@@ -608,6 +621,8 @@ button#btn-add:after {
     background-color: #009688 !important;
     border-color: #009688 !important;
 }
+
+
 
 
 
