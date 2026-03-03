@@ -24,6 +24,11 @@ class Main extends CI_Controller {
 
 		$data["listfamily"] = $this->getFamily();
 		$data["listuom"] = $this->GetUOM();
+		if($role == "supplier")
+			$data["notification"] = $this->getNotificationSupplier();
+		else
+			$data["notification"] = $this->getNotificationAdmin();
+
 		  
 		$this->load->view('index', $data);
 
@@ -70,9 +75,46 @@ class Main extends CI_Controller {
 	        return $input;
 	    }
 	}
+	function getNotificationSupplierUpdate(){
+		echo json_encode($this->getNotificationSupplier());
+	}
 
-	function getNotification(){
+	function getNotificationSupplier(){
+		$qry = file_get_contents('sp/notifyforsupplier.txt'); 
+		$supno = $this->session->userdata("supplierno");
+		
+		$listQry = explode(";", $qry); 
+ 
+		foreach ($listQry as $strQry) {
+			if(strlen(trim($strQry)) > 0) {
+				$strQry = str_replace("#supno", $supno, $strQry);
+				$query = $this->db->query($strQry . ";");
+			}
+				
+		 
+			if($strQry == $listQry[count($listQry) - 1])
+				$result = $query->result();  
+		}    
+ 		return $result;
+	}
 
+	function getNotificationAdminUpdate(){
+		echo json_encode($this->getNotificationAdmin());
+	}
+
+	function getNotificationAdmin(){
+		$qry = file_get_contents('sp/notifyforadmin.txt'); 
+		
+		$listQry = explode(";", $qry); 
+ 
+		foreach ($listQry as $strQry) {
+			if(strlen(trim($strQry)) > 0) {
+				$query = $this->db->query($strQry . ";");
+			} 
+			if($strQry == $listQry[count($listQry) - 1])
+				$result = $query->result();  
+		}    
+ 		return $result;
 	}
 
 	function getDataForChart(){
@@ -169,7 +211,8 @@ class Main extends CI_Controller {
 
 		else if($role == "supplier"){
 			$data["requestlist"] = $this->GetRequestListFromAdmin("");
-			$data["allorders"] = $this->getOrders("");
+			// $data["allorders"] = $this->getOrders("");
+			$data["backorders"] = $this->GetBackOrders();
 			// $data["sup-neworders"] = $this->getOrders("New");
 			// $data["sup-processorders"] = $this->getOrders("Process");
 			// $data["sup-incompleteorders"] = $this->getOrders("Incomplete");
@@ -478,6 +521,7 @@ class Main extends CI_Controller {
 			//Update isReceived = 1 for the selected SupplyRequest
 			$this->param = $this->query_model->param; 
 			$data["isReceived"] = 1;
+			$data["ReceivedDate"] = $datetime;
 			$this->param["dataToUpdate"] = $data;
 			$this->param["table"] = "supplyrequest";
 			$this->param["conditions"] = "SupplyRequestNo = '$SupplyRequestNo'";
@@ -487,7 +531,9 @@ class Main extends CI_Controller {
 			$qry = " UPDATE itemvariant iv ";
 			$qry .= "INNER JOIN vw_getselectedorderdetails o ";
 			$qry .= "ON iv.VariantNo = o.VariantNo ";
-			$qry .= "SET iv.Stocks = iv.Stocks - o.QtyReceived ";
+			$qry .= "INNER JOIN item i ";
+			$qry .= "ON iv.ItemNo = i.ItemNo ";
+			$qry .= "SET iv.Stocks = IFNULL(iv.Stocks,0) + o.QtyReceived , iv.Owned = 1, i.Owned = 1 ";
 			$qry .= "WHERE o.SupplyRequestNo = '$SupplyRequestNo'";
 
 			$this->db->query($qry);
@@ -503,6 +549,13 @@ class Main extends CI_Controller {
 			$this->param = $this->param = $this->query_model->param;  
 			$this->param["table"] = "vw_getbackorders";
 			$this->param["fields"] = "*"; 
+
+			$role = $this->session->userdata["role"];
+			if($role == "supplier"){
+				$supno = $this->session->userdata["supplierno"]; 
+				$this->param["conditions"] = "SupplierNo = $supno"; 
+			}
+
 	 
 			$data["list"] =  $this->query_model->getData($this->param);
 			$data["fields"] = "RequestListNo|No,SupplierName|Supplier name,ItemDescription|Item Description,Received|Qty Received,PendingQuantity|Qty Pending";
@@ -616,7 +669,7 @@ class Main extends CI_Controller {
 			if($role == "supplier")
 				$this->param["conditions"] = "SRemoved = '$isRemovedItems'";  
 			else
-				$this->param["conditions"] = "Removed = '$isRemovedItems'";  
+				$this->param["conditions"] = "Removed = '$isRemovedItems' AND Owned = 1";  
 
 
 			if($role == "supplier"){
@@ -686,6 +739,8 @@ class Main extends CI_Controller {
 			$this->param["table"] = "level2";
 			$this->param["fields"] = "Level2No `id`, Name2 `Name`";  
 			$this->param["conditions"] = "level1No = '$lvl1'";
+			if($name!="") 
+				$this->param["conditions"] .= " AND Name2 = '$name'";
 			$this->param["order"] = "Name2";  
 			$data = $this->query_model->getData($this->param);  
 			return $data;
@@ -696,6 +751,8 @@ class Main extends CI_Controller {
 			$this->param["table"] = "level3";
 			$this->param["fields"] = "Level3No `id`, Name3 `Name`";  
 			$this->param["conditions"] = "level1No = '$lvl1' AND level2No = '$lvl2'";
+			if($name!="") 
+				$this->param["conditions"] .= " AND Name3 = '$name'";
 			$this->param["order"] = "Name3";  
 			$data = $this->query_model->getData($this->param);  
 			return $data;
@@ -1016,7 +1073,7 @@ class Main extends CI_Controller {
 			$data["Level3No"] = $subcategory;
 			$data["SRemoved"] = 0;
 			$data["Removed"] = 0;
-			$data["Owned"] = 1;
+			$data["Owned"] = 0;
 			$data["SupplierNo"] = $supplierno;
 			$this->param["transactionname"] = "New items inserted:" + $itemname;
 			$this->param["dataToInsert"] = $data;
@@ -1044,6 +1101,7 @@ class Main extends CI_Controller {
 				$datavariant["VariantName"] = $v->VariantsName; 
 				$datavariant["VariantNameJSON"] = json_encode($v->VariantsNameJSON); 
 				$datavariant["SupplierNo"] = $supplierno;
+				$datavariant["Owned"] = 0;
 				$this->param["transactionname"] = "New items inserted:" + $itemname;
 				$this->param["dataToInsert"] = $datavariant;
 				$this->param["table"] = "itemvariant";
@@ -1078,6 +1136,8 @@ class Main extends CI_Controller {
 
 			$this->param["fields"] = "*" . $action; 
  		    $this->param["conditions"] = "ItemNo = '$itemno'";
+ 		    if($role == "admin")
+ 		    	$this->param["conditions"] .= " AND Owned = 1";
 			$data["list"] =  $this->query_model->getData($this->param);
 			$data["fields"] = "VariantNo|No,ThumbNail|ThumbNail,VariantName|Variant name,Price|Unit Price,SRP|Suggested Retail Price (SRP)"; 
 				 

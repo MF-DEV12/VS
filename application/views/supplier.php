@@ -13,7 +13,12 @@
                   </div>  
                 <table class="display main-table" data-table="requestlist"> </table> 
             </div> 
-         </div> 
+        </div> 
+
+        <div class="content-list" data-content="backorders">
+            <!-- <button id="" class="btn btn-action btn-action-right"><span class="glyphicon glyphicon-send"></span> Send Notification</button> -->
+            <table class="display main-table" data-table="backorders"> </table>
+        </div>
          
         <div class="content-list" data-content="allorders">
 
@@ -301,7 +306,7 @@
                 <label for="lbl-variant">Variant name:</label>
                 <p id="lbl-variant" style="padding-bottom:25px;"></p>
                 <div class="group">
-                 <input class="inputMaterial numeric" type="text" id="txt-editPrice">
+                 <input class="inputMaterial numeric" type="text" id="txt-editDpocost">
                   <span class="highlight"></span>
                   <span class="bar"></span>
                   <label class="formlabel">DPO Cost:</label>
